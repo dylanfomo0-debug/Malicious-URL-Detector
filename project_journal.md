@@ -12,12 +12,12 @@
 ### 2. Initial Inspection Findings
 *   **Missing Values**: None detected.
 *   **Duplicates**: 10,066 duplicate rows found.
-*   **Balance**: Dataset was significantly imbalanced (Benign: 428k, Malicious: 223k).
+*   **Balance**: Dataset was significantly imbalanced (Benign: 428,103, Malicious: 223,088).
 
 ### 3. Key Decisions & Rationales
-*   **Why Data Cleaning?**: Duplicate URLs can cause the model to learn the same examples repeatedly, leading to overfitting and biased results. Removing them ensures the model learns from unique samples.
-*   **Why Balance the Dataset?**: If left imbalanced, the classifier might become biased toward predicting "benign" simply because it dominates the training data. We used **undersampling** on the benign class to create a 50/50 split.
-*   **Why Binary Labels?**: We merged `phishing`, `malware`, and `defacement` into a single "Malicious" class (1). This simplifies the task to a binary classification, focusing on the core problem: is the URL dangerous or not?
+*   **Duplicate Removal**: Removed 10,066 duplicate rows to prevent model bias and overfitting.
+*   **Binary Label Conversion**: Mapped `phishing`, `malware`, and `defacement` to `1` (malicious) and `benign` to `0`. This simplifies the classification task to a binary problem.
+*   **Dataset Balancing**: Applied undersampling to the majority class (benign) to match the minority class (malicious), resulting in a balanced dataset. This mitigates bias towards the majority class.
 
 ### 4. Final Data Stats
 | Stage | Samples |
@@ -26,27 +26,29 @@
 | After removing duplicates | 641,125 |
 | Final balanced dataset | 426,090 |
 
+### 5. What I Learned
+*   Real-world datasets often require cleaning (e.g., duplicate removal) before model training.
+*   Class imbalance is a common issue in cybersecurity datasets and must be addressed to prevent model bias.
+*   Binary classification simplifies the problem when the primary goal is to distinguish between safe and unsafe.
+
 ---
 
 ## Day 3: Feature Engineering
 
-### 1. Feature Categories
-We extracted two main types of features to represent the URLs numerically:
+### 1. Feature Categories Implemented
 *   **Lexical Features**: Quantitative characteristics of the URL string.
-*   **Text Vectors (TF-IDF)**: Statistical representations of the "words" or tokens within the URL.
+*   **Text Vectors (TF-IDF)**: Statistical representations of URL tokens.
 
-### 2. Key Concepts & Decisions
-*   **Custom Tokenization**: Following the `awesome-ml-for-cybersecurity` tutorial, we used a custom tokenizer that splits URLs by `/`, `-`, and `.`. This is more effective than standard text tokenizers because it isolates meaningful segments like `wp-admin` or `login`.
-*   **Why TF-IDF?**: Term Frequency-Inverse Document Frequency (TF-IDF) was chosen over simple counts. It highlights unique, suspicious tokens (like `virus` or `exe`) while down-weighting common ones (like `www` or `com`).
-*   **Lexical Analysis**: We extracted features like URL length, special character counts (`@`, `?`, `-`), and the presence of an IP address. These are strong indicators of malicious intent (e.g., attackers often use `@` to spoof domains or long paths to hide the destination).
+### 2. Key Decisions & Rationales
+*   **Custom Tokenization**: Implemented a custom tokenizer (`get_tokens` function) that splits URLs by `/`, `-`, and `.` and filters out common, non-informative tokens (`www`, `com`). This approach is tailored for URL structures.
+*   **TF-IDF Vectorization**: Used `TfidfVectorizer` with the custom tokenizer. This method assigns weights to tokens based on their frequency in a URL and rarity across the dataset, highlighting potentially malicious terms.
+*   **Lexical Feature Selection**: Extracted features such as URL length, counts of specific characters (`.`, `-`, `_`, `/`, `?`, `=`, `@`, `&`), presence of IP addresses (`use_ip`), and HTTPS status (`is_https`). These features are known indicators of malicious URLs.
 
-### 3. Features Extracted
-*   `url_len`: Total length of the URL.
-*   `count_dot`, `count_hyphen`, `count_slash`, etc.: Counts of specific characters.
-*   `use_ip`: Binary flag for raw IP addresses in the domain.
-*   `is_https`: Security status of the protocol.
+### 3. Deliverables
+*   `lexical_features.csv`: Contains the extracted lexical features and the binary labels.
+*   `tfidf_vectorizer.joblib`: The trained TF-IDF vectorizer, saved for consistent tokenization during inference.
 
 ### 4. What I Learned
-*   URLs require specialized tokenization compared to natural language.
-*   Feature engineering is where "domain knowledge" (cybersecurity) meets "data science."
-*   Lexical features provide structural context, while TF-IDF captures semantic patterns.
+*   Effective feature engineering for URLs requires specialized tokenization and feature selection beyond standard NLP techniques.
+*   Lexical features provide valuable structural insights into URLs.
+*   TF-IDF helps in identifying significant tokens by considering their importance within the document and across the corpus.

@@ -97,3 +97,39 @@ graph TD
 [3] IBM, "What is Machine Learning?" [Online]. Available: https://www.ibm.com/topics/machine-learning.
 [4] Python Documentation, "urllib.parse — Parse URLs into components," [Online]. Available: https://docs.python.org/3/library/urllib.parse.html.
 [5] Scikit-learn, "TfidfVectorizer Documentation," [Online]. Available: https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html.
+
+## Additional Theoretical Concepts from Day 1 Guide
+
+### Key Concepts in Malicious URL Detection
+
+*   **Lexical Features**: These are characteristics extracted directly from the URL string itself. Examples include: Length of the URL, number of specific characters (e.g., dots `.`, hyphens `-`, slashes `/`, question marks `?`, equals signs `=`), presence of an IP address instead of a domain name, and use of URL shortening services.
+*   **N-Gram Model**: A technique used in natural language processing (NLP) to break down text (in our case, URL strings) into contiguous sequences of 'n' items (characters or words). This helps capture patterns that indicate malicious intent.
+*   **Tokenization**: The process of breaking down a URL string into smaller, meaningful units called "tokens." These tokens can be individual characters, words, or N-grams.
+*   **Vectorization**: Machine learning models cannot directly process raw text. Vectorization converts these tokens into numerical representations (vectors) that the models can understand. Techniques like TF-IDF (Term Frequency-Inverse Document Frequency) or CountVectorizer are commonly used for this.
+*   **Classification Models**: Algorithms like Support Vector Machines (SVMs), Logistic Regression, or Random Forests are trained on a dataset of known benign and malicious URLs. They learn patterns from the vectorized features to predict the class of new, unseen URLs.
+
+**In essence, the process involves:**
+1.  **Extracting features** from the URL (e.g., length, special characters, N-grams).
+2.  **Converting these features into numerical vectors**.
+3.  **Training a machine learning model** on these vectors and their corresponding labels (benign/malicious).
+4.  **Using the trained model** to predict whether a new URL is benign or malicious.
+
+## Additional Theoretical Concepts from Day 3 Guide
+
+### Lexical Feature Extraction
+Lexical features are often strong indicators of malicious intent. For example, attackers frequently use long URLs to hide the actual destination or use special characters like `@` to spoof legitimate domains.
+
+**Key Lexical Features:**
+*   **URL Length**: Malicious URLs tend to be longer than benign ones.
+*   **Special Character Counts**: We count occurrences of `.`, `-`, `_`, `/`, `?`, `=`, `@`, and `&`.
+*   **IP Address Presence**: Detecting if the URL uses a raw IP address instead of a domain name.
+*   **HTTPS Status**: Checking if the URL uses the secure `https` protocol.
+
+### Custom Tokenization & TF-IDF
+Standard text tokenizers (like those used for English sentences) are not ideal for URLs. Following the best practices from the `jivoi/awesome-ml-for-cybersecurity` repository, we implemented a custom tokenizer.
+
+**The Custom Tokenizer:**
+Our tokenizer splits URLs by common delimiters: `/`, `-`, and `.`. It also filters out non-informative tokens like `www` and `com`. This helps the model focus on meaningful segments like `wp-admin`, `login`, or `virus`.
+
+**TF-IDF Vectorization:**
+We use **TF-IDF (Term Frequency-Inverse Document Frequency)** to vectorize these tokens. TF-IDF is superior to simple counting because it rewards tokens that are frequent in a specific URL but rare across the entire dataset, effectively highlighting suspicious "keywords."
